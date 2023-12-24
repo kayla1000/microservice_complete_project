@@ -59,22 +59,11 @@ pipeline {
                 sh ". ./jenkins/push-staging-docker-images-to-ecr.sh"
             }
         }
-
-        stage('Install Rancher CLI') {
-            steps {
-                script {
-                    sh 'curl -L https://github.com/rancher/cli/releases/download/v2.4.11/rancher-linux-amd64 -o /usr/local/bin/rancher'
-                    sh 'chmod +x /usr/local/bin/rancher'
-                }
-            }
-        }
-
-
-
         stage('Deploy App on Petclinic Kubernetes Cluster'){
             steps {
                 echo 'Deploying App on K8s Cluster'
-                sh "rancher login $RANCHER_URL --context $RANCHER_CONTEXT --token $RANCHER_CREDS_USR:$RANCHER_CREDS_PSW"
+                sh "rancher login $RANCHER_URL --context $RANCHER_CONTEXT --token admin:lawrenceisola"
+                //sh "rancher login $RANCHER_URL --context $RANCHER_CONTEXT --token $RANCHER_CREDS_USR:$RANCHER_CREDS_PSW"
                 sh "envsubst < k8s/petclinic_chart/values-template.yaml > k8s/petclinic_chart/values.yaml"
                 sh "sed -i s/HELM_VERSION/${BUILD_NUMBER}/ k8s/petclinic_chart/Chart.yaml"
                 sh "rancher kubectl delete secret regcred -n petclinic-staging-ns || true"
